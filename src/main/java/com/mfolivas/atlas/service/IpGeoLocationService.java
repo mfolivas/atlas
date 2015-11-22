@@ -6,6 +6,6 @@ import com.mfolivas.atlas.domain.IpRequest;
 /**
  * Retrieve IP information back to the client.
  */
-public interface IpAddressService {
+public interface IpGeoLocationService {
     GeoInformation extractIpInformation(IpRequest ipRequest);
 }
