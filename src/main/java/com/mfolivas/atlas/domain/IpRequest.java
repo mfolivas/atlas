@@ -6,6 +6,7 @@ import java.util.Optional;
 
 /**
  * Validation and creation of the ip request.
+ * @author Marcelo Olivas
  */
 public final class IpRequest {
 
