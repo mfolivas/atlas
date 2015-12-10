@@ -51,6 +51,19 @@
 			<version>1</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.netflix.hystrix</groupId>
+			<artifactId>hystrix-core</artifactId>
+			<version>1.4.14</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.reactivex</groupId>
+			<artifactId>rxjava</artifactId>
+			<version>1.0.8</version>
+		</dependency>
+
+
 	</dependencies>
 	
 	<build>

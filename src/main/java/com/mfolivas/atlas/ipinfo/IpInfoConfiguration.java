@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component;
 public class IpInfoConfiguration {
 
     private String host;
+    private String commandGroupKey;
+    private String commandKey;
+
 
     public String getHost() {
         return host;
@@ -18,5 +21,21 @@ public class IpInfoConfiguration {
 
     public void setHost(String host) {
         this.host = host;
+    }
+
+    public String getCommandGroupKey() {
+        return commandGroupKey;
+    }
+
+    public void setCommandGroupKey(String commandGroupKey) {
+        this.commandGroupKey = commandGroupKey;
+    }
+
+    public String getCommandKey() {
+        return commandKey;
+    }
+
+    public void setCommandKey(String commandKey) {
+        this.commandKey = commandKey;
     }
 }

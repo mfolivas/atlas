@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 import javax.inject.Inject;
 
@@ -27,10 +26,9 @@ public class IpGeoLocationController {
     }
 
     @RequestMapping(value = "/{ip:.*}", method = RequestMethod.GET, consumes = {MediaType.APPLICATION_JSON_VALUE})
-    public IpInfoResponse extractGeoLocationByIp(@PathVariable String ip) {
+    public GeoLocationResponse extractGeoLocationByIp(@PathVariable String ip) throws Exception {
         IpRequest ipRequest = IpRequest.valueOf(ip);
-        RestTemplate restTemplate = new RestTemplate();
-        return restTemplate.getForObject("http://ipinfo.io/{ip}/geo", IpInfoResponse.class, ipRequest.getIp());
+        return ipInfoGeoLocationService.extractIpInformation(ipRequest);
     }
 
     @ExceptionHandler(InvalidIpAddress.class)
