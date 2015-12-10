@@ -1,6 +1,6 @@
 package com.mfolivas.atlas;
 
-import com.mfolivas.atlas.controller.IpInfoResponse;
+import com.mfolivas.atlas.controller.GeoLocationResponse;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,7 +18,7 @@ public class AtlasApplicationTests {
 	public void contextLoads() {
 		String ip = "8.8.8.8";
 		RestTemplate restTemplate = new RestTemplate();
-		IpInfoResponse response = restTemplate.getForObject("http://ipinfo.io/{ip}/geo", IpInfoResponse.class, ip);
+		GeoLocationResponse response = restTemplate.getForObject("http://ipinfo.io/{ip}/geo", GeoLocationResponse.class, ip);
 		Assert.assertNotNull(response);
 	}
 

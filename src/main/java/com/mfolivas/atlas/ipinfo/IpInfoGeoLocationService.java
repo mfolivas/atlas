@@ -1,8 +1,9 @@
 package com.mfolivas.atlas.ipinfo;
 
-import com.mfolivas.atlas.domain.GeoInformation;
+import com.mfolivas.atlas.controller.GeoLocationResponse;
 import com.mfolivas.atlas.domain.IpRequest;
 import com.mfolivas.atlas.service.IpGeoLocationService;
+import com.netflix.hystrix.strategy.concurrency.HystrixRequestContext;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -15,14 +16,19 @@ public class IpInfoGeoLocationService implements IpGeoLocationService {
 
     private final IpInfoConfiguration ipInfoConfiguration;
 
-
     @Inject
     public IpInfoGeoLocationService(IpInfoConfiguration ipInfoConfiguration) {
         this.ipInfoConfiguration = ipInfoConfiguration;
     }
 
     @Override
-    public GeoInformation extractIpInformation(IpRequest ipRequest) {
-        return null;
+    public GeoLocationResponse extractIpInformation(IpRequest ipRequest) throws Exception {
+        //To enable caching we need to enable context: https://github.com/Netflix/Hystrix/wiki/How-To-Use#request-context-setup
+        HystrixRequestContext context = HystrixRequestContext.initializeContext();
+        IpInfoGeoLocationCommand ipInfoGeoLocationCommand = new IpInfoGeoLocationCommand(ipInfoConfiguration, ipRequest);
+        context.shutdown();
+        return ipInfoGeoLocationCommand.run();
     }
+
+
 }

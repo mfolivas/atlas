@@ -3,7 +3,7 @@ package com.mfolivas.atlas.controller;
 /**
  * @author Marcelo Olivas.
  */
-public class IpInfoResponse {
+public class GeoLocationResponse {
     private String ip;
     private String city;
     private String region;
@@ -62,7 +62,7 @@ public class IpInfoResponse {
 
     @Override
     public String toString() {
-        return "IpInfoResponse{" +
+        return "GeoLocationResponse{" +
                 "ip='" + ip + '\'' +
                 ", city='" + city + '\'' +
                 ", region='" + region + '\'' +
