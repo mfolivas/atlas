@@ -1,0 +1,5 @@
+ipinfo:
+  host: http://ipinfo.io/
+  commandGroupKey: GeoLocators
+  commandKey: ipinfo.io
+
