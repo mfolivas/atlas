@@ -14,6 +14,8 @@ import org.springframework.web.client.RestTemplate;
 @WebAppConfiguration
 public class AtlasApplicationTests {
 
+
+
 	@Test
 	public void contextLoads() {
 		String ip = "8.8.8.8";
