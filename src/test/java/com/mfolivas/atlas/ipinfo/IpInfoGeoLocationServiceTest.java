@@ -1,67 +1,46 @@
 package com.mfolivas.atlas.ipinfo;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.mfolivas.atlas.controller.GeoLocationResponse;
 import com.mfolivas.atlas.domain.IpRequest;
 import org.junit.Rule;
 import org.junit.Test;
-import org.springframework.web.client.RestTemplate;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.Assert.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+
 
 /**
- *
- * @author Marcelo Olivas
- *
+ * Testing the ipinfo integration.
  */
 public class IpInfoGeoLocationServiceTest {
-    public static final String IP_ADRESS = "99.117.133.228";
 
+    public static final String IP = "75.106.116.234";
     @Rule
-    public WireMockRule ipInfoMock = new WireMockRule();
+    public WireMockRule wireMockRule = new WireMockRule();
 
     @Test
-    public void shouldReturnAValidIpAddress() throws Exception {
-        ipInfoMock.stubFor(get(urlPathEqualTo(IP_ADRESS + "/geo"))
-                .withHeader("Accept", equalTo("application/json"))
-                .willReturn(aResponse().withStatus(200).withBody("{\n" +
-                        "\"ip\": \"" + IP_ADRESS + "\",\n" +
-                        "\"city\": \"Miami\",\n" +
-                        "\"region\": \"Florida\",\n" +
-                        "\"country\": \"US\",\n" +
-                        "\"loc\": \"25.6586,-80.3568\",\n" +
-                        "\"postal\": \"33176\"\n" +
+    public void testExtractIpInformation() throws Exception {
+        stubFor(get(urlMatching(".*/geo"))
+                .willReturn(aResponse().withHeader("Content-Type", "application/json").withStatus(200).withBody("{\n" +
+                        "  \"ip\": \"" + IP + "\",\n" +
+                        "  \"hostname\": \"No Hostname\",\n" +
+                        "  \"city\": \"Sewanee\",\n" +
+                        "  \"region\": \"Tennessee\",\n" +
+                        "  \"country\": \"US\",\n" +
+                        "  \"loc\": \"35.2031,-85.9211\",\n" +
+                        "  \"org\": \"AS7155 ViaSat,Inc.\",\n" +
+                        "  \"postal\": \"37375\"\n" +
                         "}")));
         IpInfoConfiguration ipInfoConfiguration = new IpInfoConfiguration();
-        ipInfoConfiguration.setHost("http://localhost:8080");
-        ipInfoConfiguration.setCommandGroupKey("geolocation");
+        ipInfoConfiguration.setCommandGroupKey("ipinfo");
         ipInfoConfiguration.setCommandKey("ipinfo");
-        RestTemplate restTemplate = new RestTemplate();
-        GeoLocationResponse geoLoc = restTemplate.getForObject("http://localhost:8080/{ip}/geo", GeoLocationResponse.class, IP_ADRESS);
+        ipInfoConfiguration.setHost("http://localhost:8080");
+        IpRequest ipRequest = IpRequest.valueOf(IP);
         IpInfoGeoLocationService ipInfoGeoLocationService = new IpInfoGeoLocationService(ipInfoConfiguration);
-        GeoLocationResponse geoLocationResponse = ipInfoGeoLocationService.extractIpInformation(IpRequest.valueOf(IP_ADRESS));
+        GeoLocationResponse geoLocationResponse = ipInfoGeoLocationService.extractIpInformation(ipRequest);
         assertNotNull(geoLocationResponse);
+        assertEquals(geoLocationResponse.getLoc(), "35.2031,-85.9211");
 
-    }
-
-    @Test
-    public void exampleTest() {
-        stubFor(get(urlEqualTo("/my/resource"))
-                .withHeader("Accept", equalTo("text/xml"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "text/xml")
-                        .withBody("<response>Some content</response>")));
-
-        RestTemplate restTemplate = new RestTemplate();
-        Result result = restTemplate.getForEntity("");
-
-        assertTrue(result.wasSuccessFul());
-
-        verify(postRequestedFor(urlMatching("/my/resource/[a-z0-9]+"))
-                .withRequestBody(matching(".*<message>1234</message>.*"))
-                .withHeader("Content-Type", notMatching("application/json")));
     }
 }
