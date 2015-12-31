@@ -28,6 +28,7 @@ public class IpInfoGeoLocationCommand extends HystrixCommand<GeoLocationResponse
 
     private final IpInfoConfiguration ipInfoConfiguration;
     private final IpRequest ipRequest;
+    private final RestTemplate restTemplate = new RestTemplate();
 
 
     public IpInfoGeoLocationCommand(IpInfoConfiguration ipInfoConfiguration, IpRequest ipRequest) {
@@ -42,7 +43,6 @@ public class IpInfoGeoLocationCommand extends HystrixCommand<GeoLocationResponse
 
     @Override
     protected GeoLocationResponse run() throws Exception {
-        RestTemplate restTemplate = new RestTemplate();
         return restTemplate.getForObject(ipInfoConfiguration.getHost() + GEO_LOCATION_ONLY, GeoLocationResponse.class, ipRequest.getIp());
     }
 
