@@ -25,9 +25,14 @@ public class IpInfoGeoLocationService implements IpGeoLocationService {
     public GeoLocationResponse extractIpInformation(IpRequest ipRequest) throws Exception {
         //To enable caching we need to enable context: https://github.com/Netflix/Hystrix/wiki/How-To-Use#request-context-setup
         HystrixRequestContext context = HystrixRequestContext.initializeContext();
-        IpInfoGeoLocationCommand ipInfoGeoLocationCommand = new IpInfoGeoLocationCommand(ipInfoConfiguration, ipRequest);
-        context.shutdown();
-        return ipInfoGeoLocationCommand.run();
+        try {
+            IpInfoGeoLocationCommand ipInfoGeoLocationCommand = new IpInfoGeoLocationCommand(ipInfoConfiguration, ipRequest);
+            return ipInfoGeoLocationCommand.execute();
+        } finally {
+            context.shutdown();
+        }
+
+
     }
 
 
