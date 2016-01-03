@@ -18,10 +18,6 @@ public class AtlasApplicationTests {
 
 	@Test
 	public void contextLoads() {
-		String ip = "8.8.8.8";
-		RestTemplate restTemplate = new RestTemplate();
-		GeoLocationResponse response = restTemplate.getForObject("http://ipinfo.io/{ip}/geo", GeoLocationResponse.class, ip);
-		Assert.assertNotNull(response);
 	}
 
 }
