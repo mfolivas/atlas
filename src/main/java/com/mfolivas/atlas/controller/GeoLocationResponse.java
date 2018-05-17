@@ -1,5 +1,7 @@
 package com.mfolivas.atlas.controller;
 
+import java.util.Objects;
+
 /**
  * @author Marcelo Olivas.
  */
@@ -58,6 +60,25 @@ public class GeoLocationResponse {
 
     public void setPostal(String postal) {
         this.postal = postal;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GeoLocationResponse that = (GeoLocationResponse) o;
+        return Objects.equals(ip, that.ip) &&
+                Objects.equals(city, that.city) &&
+                Objects.equals(region, that.region) &&
+                Objects.equals(country, that.country) &&
+                Objects.equals(loc, that.loc) &&
+                Objects.equals(postal, that.postal);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(ip, city, region, country, loc, postal);
     }
 
     @Override

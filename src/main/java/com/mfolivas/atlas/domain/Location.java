@@ -44,15 +44,16 @@ public final class Location {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Location location = (Location) o;
-        return Objects.equals(getCity(), location.getCity()) &&
-                Objects.equals(getRegion(), location.getRegion()) &&
-                Objects.equals(getCountry(), location.getCountry()) &&
-                Objects.equals(getPostalCode(), location.getPostalCode());
+        return Objects.equals(city, location.city) &&
+                Objects.equals(region, location.region) &&
+                Objects.equals(country, location.country) &&
+                Objects.equals(postalCode, location.postalCode);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getCity(), getRegion(), getCountry(), getPostalCode());
+
+        return Objects.hash(city, region, country, postalCode);
     }
 
     @Override

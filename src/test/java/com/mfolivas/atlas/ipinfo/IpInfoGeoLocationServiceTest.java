@@ -1,25 +1,39 @@
 package com.mfolivas.atlas.ipinfo;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.mfolivas.atlas.controller.GeoLocationResponse;
 import com.mfolivas.atlas.domain.IpRequest;
-import org.junit.Rule;
+
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import javax.inject.Inject;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static org.assertj.core.api.Assertions.not;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 /**
  * Testing the ipinfo integration.
  */
+@RunWith(SpringRunner.class)
+@SpringBootTest(properties = {"ipinfo.host=http://localhost:6064",
+        "hystrix.command.geoLocators.execution.isolation.thread.timeoutInMilliseconds=100"},
+        webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@AutoConfigureWireMock(port = 6064)
 public class IpInfoGeoLocationServiceTest {
 
-    public static final String IP = "75.106.116.234";
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule();
+    private static final String IP = "75.106.116.234";
+
+    @Inject
+    private IpInfoGeoLocationService ipInfoGeoLocationService;
 
     @Test
     public void shouldReturnTheProperIpAndLocationWhenFetchingRequest() throws Exception {
@@ -34,14 +48,10 @@ public class IpInfoGeoLocationServiceTest {
                         "  \"org\": \"AS7155 ViaSat,Inc.\",\n" +
                         "  \"postal\": \"37375\"\n" +
                         "}")));
-        IpInfoConfiguration ipInfoConfiguration = new IpInfoConfiguration();
-        ipInfoConfiguration.setCommandGroupKey("ipinfo");
-        ipInfoConfiguration.setCommandKey("ipinfo");
-        ipInfoConfiguration.setHost("http://localhost:8080");
+
         IpRequest ipRequest = IpRequest.valueOf(IP);
-        IpInfoGeoLocationService ipInfoGeoLocationService = new IpInfoGeoLocationService(ipInfoConfiguration);
         GeoLocationResponse geoLocationResponse = ipInfoGeoLocationService.extractIpInformation(ipRequest);
-        assertNotNull(geoLocationResponse);
+        assertThat(geoLocationResponse, is(notNullValue()));
         assertThat(geoLocationResponse.getIp(), is(IP));
         assertThat(geoLocationResponse.getLoc(), is("35.2031,-85.9211"));
 
@@ -56,25 +66,22 @@ public class IpInfoGeoLocationServiceTest {
                         .withStatus(200)
                         .withFixedDelay(4000)
                         .withBody("{\n" +
-                        "  \"ip\": \"" + localHost + "\",\n" +
-                        "  \"hostname\": \"No Hostname\",\n" +
-                        "  \"city\": \"Sewanee\",\n" +
-                        "  \"region\": \"Tennessee\",\n" +
-                        "  \"country\": \"US\",\n" +
-                        "  \"loc\": \"35.2031,-85.9211\",\n" +
-                        "  \"org\": \"AS7155 ViaSat,Inc.\",\n" +
-                        "  \"postal\": \"37375\"\n" +
-                        "}")));
-        IpInfoConfiguration ipInfoConfiguration = new IpInfoConfiguration();
-        ipInfoConfiguration.setCommandGroupKey("ipinfo");
-        ipInfoConfiguration.setCommandKey("ipinfo");
-        ipInfoConfiguration.setHost("http://localhost:8080");
+                                "  \"ip\": \"" + localHost + "\",\n" +
+                                "  \"hostname\": \"No Hostname\",\n" +
+                                "  \"city\": \"Sewanee\",\n" +
+                                "  \"region\": \"Tennessee\",\n" +
+                                "  \"country\": \"US\",\n" +
+                                "  \"loc\": \"35.2031,-85.9211\",\n" +
+                                "  \"org\": \"AS7155 ViaSat,Inc.\",\n" +
+                                "  \"postal\": \"37375\"\n" +
+                                "}")));
+
         IpRequest ipRequest = IpRequest.valueOf(localHost);
-        IpInfoGeoLocationService ipInfoGeoLocationService = new IpInfoGeoLocationService(ipInfoConfiguration);
         GeoLocationResponse geoLocationResponse = ipInfoGeoLocationService.extractIpInformation(ipRequest);
-        assertNotNull(geoLocationResponse);
+        assertThat(geoLocationResponse, is(notNullValue()));
         assertThat(geoLocationResponse.getIp(), is(not(localHost)));
         assertThat(geoLocationResponse.getLoc(), is(not("35.2031,-85.9211")));
         assertThat(geoLocationResponse.getIp(), is("8.8.8.8"));
     }
 }
+
