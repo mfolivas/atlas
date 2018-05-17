@@ -1,4 +1,4 @@
-package com.mfolivas.atlas.atlas;
+package com.mfolivas.atlas;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
