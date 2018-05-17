@@ -1,26 +1,42 @@
 package com.mfolivas.atlas.ipinfo;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.mfolivas.atlas.controller.GeoLocationResponse;
 import com.mfolivas.atlas.domain.IpRequest;
-import org.junit.Rule;
+
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.*;
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import javax.inject.Inject;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static org.assertj.core.api.Assertions.not;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 /**
  * Testing the ipinfo integration.
  */
+@RunWith(SpringRunner.class)
+@SpringBootTest(properties = {"ipinfo.host=http://localhost:6064",
+        "hystrix.command.geoLocators.execution.isolation.thread.timeoutInMilliseconds=100"},
+        webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@AutoConfigureWireMock(port = 6064)
 public class IpInfoGeoLocationServiceTest {
 
-    public static final String IP = "75.106.116.234";
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule();
+    private static final String IP = "75.106.116.234";
+
+    @Inject
+    private IpInfoGeoLocationService ipInfoGeoLocationService;
 
     @Test
-    public void testExtractIpInformation() throws Exception {
+    public void shouldReturnTheProperIpAndLocationWhenFetchingRequest() throws Exception {
         stubFor(get(urlMatching(".*/geo"))
                 .willReturn(aResponse().withHeader("Content-Type", "application/json").withStatus(200).withBody("{\n" +
                         "  \"ip\": \"" + IP + "\",\n" +
@@ -32,15 +48,40 @@ public class IpInfoGeoLocationServiceTest {
                         "  \"org\": \"AS7155 ViaSat,Inc.\",\n" +
                         "  \"postal\": \"37375\"\n" +
                         "}")));
-        IpInfoConfiguration ipInfoConfiguration = new IpInfoConfiguration();
-        ipInfoConfiguration.setCommandGroupKey("ipinfo");
-        ipInfoConfiguration.setCommandKey("ipinfo");
-        ipInfoConfiguration.setHost("http://localhost:8080");
+
         IpRequest ipRequest = IpRequest.valueOf(IP);
-        IpInfoGeoLocationService ipInfoGeoLocationService = new IpInfoGeoLocationService(ipInfoConfiguration);
         GeoLocationResponse geoLocationResponse = ipInfoGeoLocationService.extractIpInformation(ipRequest);
-        assertNotNull(geoLocationResponse);
-        assertEquals(geoLocationResponse.getLoc(), "35.2031,-85.9211");
+        assertThat(geoLocationResponse, is(notNullValue()));
+        assertThat(geoLocationResponse.getIp(), is(IP));
+        assertThat(geoLocationResponse.getLoc(), is("35.2031,-85.9211"));
 
     }
+
+    @Test
+    public void shouldReturnFallbackRequestWhenTimeIsLongerThanOneSecond() throws Exception {
+        String localHost = "127.0.0.1";
+        stubFor(get(urlMatching(".*/geo"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)
+                        .withFixedDelay(4000)
+                        .withBody("{\n" +
+                                "  \"ip\": \"" + localHost + "\",\n" +
+                                "  \"hostname\": \"No Hostname\",\n" +
+                                "  \"city\": \"Sewanee\",\n" +
+                                "  \"region\": \"Tennessee\",\n" +
+                                "  \"country\": \"US\",\n" +
+                                "  \"loc\": \"35.2031,-85.9211\",\n" +
+                                "  \"org\": \"AS7155 ViaSat,Inc.\",\n" +
+                                "  \"postal\": \"37375\"\n" +
+                                "}")));
+
+        IpRequest ipRequest = IpRequest.valueOf(localHost);
+        GeoLocationResponse geoLocationResponse = ipInfoGeoLocationService.extractIpInformation(ipRequest);
+        assertThat(geoLocationResponse, is(notNullValue()));
+        assertThat(geoLocationResponse.getIp(), is(not(localHost)));
+        assertThat(geoLocationResponse.getLoc(), is(not("35.2031,-85.9211")));
+        assertThat(geoLocationResponse.getIp(), is("8.8.8.8"));
+    }
 }
+
