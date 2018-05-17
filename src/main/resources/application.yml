@@ -4,3 +4,14 @@ ipinfo:
   commandKey: ipinfo.io
 
 hystrix.command.geoLocators.execution.isolation.thread.timeoutInMilliseconds: 1000
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - prometheus
+          - metrics
+          - info
+          - health

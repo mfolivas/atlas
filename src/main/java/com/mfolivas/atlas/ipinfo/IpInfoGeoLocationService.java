@@ -2,14 +2,14 @@ package com.mfolivas.atlas.ipinfo;
 
 import com.mfolivas.atlas.controller.GeoLocationResponse;
 import com.mfolivas.atlas.domain.IpRequest;
-import com.mfolivas.atlas.service.IpGeoLocationService;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import com.netflix.hystrix.strategy.concurrency.HystrixRequestContext;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import javax.inject.Inject;
 import java.util.Random;
+
+import javax.inject.Inject;
 
 /**
  * Implementation for the ipinfo.io.
