@@ -12,7 +12,6 @@ import javax.inject.Inject;
 
 /**
  * Controller to fetch the geo location from a particular IP by leveraging a third party provider.
- * @author marcelo.
  */
 @RestController
 public class IpGeoLocationController {
@@ -25,7 +24,7 @@ public class IpGeoLocationController {
         this.ipInfoGeoLocationService = ipInfoGeoLocationService;
     }
 
-    @RequestMapping(value = "/{ip:.*}", method = RequestMethod.GET, consumes = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping("/{ip:.*}")
     public GeoLocationResponse extractGeoLocationByIp(@PathVariable String ip) throws Exception {
         IpRequest ipRequest = IpRequest.valueOf(ip);
         return ipInfoGeoLocationService.extractIpInformation(ipRequest);

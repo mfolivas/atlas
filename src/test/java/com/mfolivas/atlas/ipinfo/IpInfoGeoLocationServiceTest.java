@@ -25,12 +25,12 @@ import static org.junit.Assert.assertThat;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = {"ipinfo.host=http://localhost:6064",
-        "hystrix.command.geoLocators.execution.isolation.thread.timeoutInMilliseconds=2000"},
+        "hystrix.command.geoLocators.execution.isolation.thread.timeoutInMilliseconds=100"},
         webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @AutoConfigureWireMock(port = 6064)
 public class IpInfoGeoLocationServiceTest {
 
-    public static final String IP = "75.106.116.234";
+    private static final String IP = "75.106.116.234";
 
     @Inject
     private IpInfoGeoLocationService ipInfoGeoLocationService;
