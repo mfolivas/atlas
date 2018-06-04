@@ -12,11 +12,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 import javax.inject.Inject;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static org.assertj.core.api.Assertions.not;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
@@ -24,8 +24,7 @@ import static org.junit.Assert.assertThat;
  * Testing the ipinfo integration.
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(properties = {"ipinfo.host=http://localhost:6064",
-        "hystrix.command.geoLocators.execution.isolation.thread.timeoutInMilliseconds=100"},
+@SpringBootTest(properties = {"ipinfo.host=http://localhost:6064"},
         webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @AutoConfigureWireMock(port = 6064)
 public class IpInfoGeoLocationServiceTest {
@@ -63,18 +62,9 @@ public class IpInfoGeoLocationServiceTest {
         stubFor(get(urlMatching(".*/geo"))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json")
+                        .withFixedDelay(50000)
                         .withStatus(200)
-                        .withFixedDelay(4000)
-                        .withBody("{\n" +
-                                "  \"ip\": \"" + localHost + "\",\n" +
-                                "  \"hostname\": \"No Hostname\",\n" +
-                                "  \"city\": \"Sewanee\",\n" +
-                                "  \"region\": \"Tennessee\",\n" +
-                                "  \"country\": \"US\",\n" +
-                                "  \"loc\": \"35.2031,-85.9211\",\n" +
-                                "  \"org\": \"AS7155 ViaSat,Inc.\",\n" +
-                                "  \"postal\": \"37375\"\n" +
-                                "}")));
+                                .withBody("{}")));
 
         IpRequest ipRequest = IpRequest.valueOf(localHost);
         GeoLocationResponse geoLocationResponse = ipInfoGeoLocationService.extractIpInformation(ipRequest);

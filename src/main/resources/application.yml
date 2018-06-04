@@ -3,7 +3,7 @@ ipinfo:
   commandGroupKey: GeoLocators
   commandKey: ipinfo.io
 
-hystrix.command.geoLocators.execution.isolation.thread.timeoutInMilliseconds: 1000
+hystrix.command.ipinfo.execution.isolation.thread.timeoutInMilliseconds: 1000
 
 
 management:
