@@ -4,11 +4,12 @@ import com.mfolivas.atlas.controller.GeoLocationResponse;
 import com.mfolivas.atlas.domain.IpRequest;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -21,6 +22,7 @@ import io.micrometer.core.instrument.Timer;
  */
 @Service
 public class IpInfoGeoLocationService {
+    private static final Logger log = LoggerFactory.getLogger(IpInfoGeoLocationService.class);
 
     private final IpInfoConfiguration ipInfoConfiguration;
     private static final String GEO_LOCATION_ONLY = "/{ip}/geo";
@@ -39,20 +41,13 @@ public class IpInfoGeoLocationService {
         this.timer = meterRegistry.timer("ipinfo.latency");
     }
 
-    @HystrixCommand(fallbackMethod = "defaultGeoName", groupKey = "geoLocators", commandKey = "ipinfo.io")
-    public GeoLocationResponse extractIpInformation(IpRequest ipRequest) throws Exception {
-        timer.record(() -> {
-            try {
-                TimeUnit.MILLISECONDS.sleep(2500);
-            } catch (InterruptedException ignored) {
-            }
-        });
-        //TODO(marcelo) need to figure out the caching aspect
-        Thread.sleep(random.nextInt(3) * 1000);
+    @HystrixCommand(fallbackMethod = "defaultGeoName", groupKey = "geoLocators", commandKey = "ipinfo")
+    public GeoLocationResponse extractIpInformation(IpRequest ipRequest) {
         return restTemplate.getForObject(ipInfoConfiguration.getHost() + GEO_LOCATION_ONLY, GeoLocationResponse.class, ipRequest.getIp());
     }
 
     public GeoLocationResponse defaultGeoName(IpRequest ipRequest) {
+        log.warn("Timeout from the provider. Using default geo name");
         counter.increment();
         GeoLocationResponse google = new GeoLocationResponse();
         google.setIp("8.8.8.8");
